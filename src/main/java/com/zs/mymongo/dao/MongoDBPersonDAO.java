@@ -19,8 +19,7 @@ import com.mongodb.MongoClient;
 import com.zs.mymongo.model.Person;
 import com.zs.mymongo.converter.PersonConverter;
 /**
- *
- * @author szhang
+ * operations we can perform for Person object in MongoDB database
  */
 public class MongoDBPersonDAO {
     private DBCollection col;
@@ -44,7 +43,7 @@ public class MongoDBPersonDAO {
     }
  
     public List<Person> readAllPerson() {
-        List<Person> data = new ArrayList<Person>();
+        List<Person> data = new ArrayList();
         DBCursor cursor = col.find();
         while (cursor.hasNext()) {
             DBObject doc = cursor.next();

@@ -8,11 +8,11 @@ package com.zs.mymongo.converter;
 import org.bson.types.ObjectId;
  
 import com.zs.mymongo.model.Person;
+
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBObject;
 /**
- *
- * @author szhang
+ *converting Person object to MongoDB DBObject and vice versa
  */
 public class PersonConverter {
     // convert Person Object to MongoDB DBObject

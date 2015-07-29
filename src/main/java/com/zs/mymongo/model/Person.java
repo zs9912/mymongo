@@ -7,7 +7,7 @@ package com.zs.mymongo.model;
 
 /**
  *
- * @author szhang
+ * http://www.journaldev.com/4011/mongodb-java-servlet-web-application-example-tutorial
  */
 public class Person {
     // id will be used for primary key in MongoDB

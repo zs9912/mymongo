@@ -14,8 +14,8 @@ import javax.servlet.annotation.WebListener;
  
 import com.mongodb.MongoClient;
 /**
- *
- * @author szhang
+ * MongoClient is thread safe and internally manages it’s own connection pool. 
+ * Best practice is to create an instance of it and reuse it.
  */
 @WebListener
 public class MongoDBContextListener implements ServletContextListener{
