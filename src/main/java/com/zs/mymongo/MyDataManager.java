@@ -61,6 +61,9 @@ public class MyDataManager {
         //dm.deleteDocuments();        
         //dm.deleteAll();
         //dm.dropCollection();
+        
+        //dm.getDocumentsGroupBy();
+        dm.getDocumentsFilter();
     }   
     
     
@@ -239,7 +242,11 @@ public class MyDataManager {
         db.getCollection("restaurants").drop();
     }
     
-    public AggregateIterable<Document> getDocumentsGroupBy(){
+    /*
+    groups the documents in the restaurants collection by the borough field and 
+    uses the $sum accumulator to count the documents for each group.
+    */
+    public void getDocumentsGroupBy(){
         AggregateIterable<Document> iterable = db.getCollection("restaurants").aggregate(asList(new Document("$group", 
         new Document("_id","$borough").append("count", new Document("$sum",1)))));
         iterable.forEach(new Block<Document>(){
@@ -247,7 +254,33 @@ public class MyDataManager {
             public void apply(final Document document){
                 System.out.println(document.toJson());
             }
-        });
-        return iterable;
+        });        
     } 
+    
+    /*
+    uses $match to query the restaurants collection for documents with borough equal to "Queens" 
+    and cuisine equal to Brazilian. 
+    Then the $group stage groups the matching documents by the address.zipcode field 
+    and uses the $sum accumulator to calculate the count.
+    */
+    public void getDocumentsFilter(){
+        AggregateIterable<Document> iterable = db.getCollection("restaurants").aggregate(asList(
+        new Document("$match", new Document("borough", "Queens").append("cuisine", "Brazilian")),
+        new Document("$group", new Document("_id", "$address.zipcode").append("count", new Document("$sum", 1)))));
+        
+        iterable.forEach(new Block<Document>(){
+            @Override
+            public void apply(final Document document){
+                System.out.println(document.toJson());
+            }
+        });        
+    }
+    
+    public void createSignleIndex(){
+        db.getCollection("restaurants").createIndex(new Document("cuisine",1));
+    }
+    
+    public void createCompoundIndex(){
+        db.getCollection("restaurants").createIndex(new Document("cuisine", 1).append("address.zipcode", -1));
+    }
 }
