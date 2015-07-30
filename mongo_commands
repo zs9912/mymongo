@@ -1,0 +1,134 @@
+https://cs.uwaterloo.ca/~tozsu/courses/CS848/W15/papers/nosqldbs.pdf
+http://www.tutorialspoint.com/mongodb/mongodb_map_reduce.htm
+
+<fieldname>: {$<operator>: <value>}
+<fieldname>: {$<operator>: <value>, $<operator>: value}
+
+Non-equality: $ne
+Numerical Relations: $gt, $gte, $lt, $lte
+                      >    >=    <     <=
+Modulo with divisor and the modulo compare value in a two-element array
+{ age: {$mod: [2,1]} }
+
+$in(In), $nin (Not In)
+{ categories: {$in: ["NoSQL", "Document"]} }
+
+$all
+{ categories: {$all: ["NoSQL", "Document"]} }
+
+$size
+{ categories: {$size: 2} }
+
+$exists
+{ categories: { $exists: false}, body: {$exists: true} } //category doesn't exist and body exists
+
+select all documents in the inventory collection where the qty field exists and its value does not equal 5 or 15
+db.inventory.find( { qty: { $exists: true, $nin: [5,15] } } )
+
+$not
+{ $not: {categories: {$in: {"NoSQL"}}} } //category does not contain "NoSQL"
+{ $not: {title: /^Mongo/i} } //title does not start with "Mongo"
+
+$where
+db.<collection>.find( { $where: "this.a == 1" } )
+
+similar to sql query SELECT ... FROM ...
+db.<collection>.find( {<selection criteria>}, {<field_1>:1, ...} );  //including field_1
+db.<collection>.find( {<selection criteria>}, {<field_1>:0, ...} ); //excluding field_1
+
+db.restaurants.find({cuisine: "Italian"}, {"address": 0}).limit(2) //select all fields except address
+db.restaurants.find({cuisine: "Italian"}, {"address": 1}).limit(2) //select _id and address only
+
+skip
+db.<collection>.find( ... ).sort({field>:<1 | -1>}).limit(<number>).skip(<number>);  //ignoring the first n results
+
+$slice
+db.<collection>.find( {...}, {<field>: {$slice: n}} ); //skip first n elements
+db.<collection>.find( {...}, {<field>: {$slice: -n}} ); //skip last n elements
+db.<collection>.find( {...}, {<field>: {$slice: [m,n]}} ); //skip m from beginning, limit n
+db.<collection>.find( {...}, {<field>: {$slice: [-m,n]}} ); //skip m from end, limit n
+
+db.<collection>.find( ... ).count()
+
+var cursor = db.<collection>.find( {...})
+cursor.forEach( function(result) {...} )
+
+db.<collection>.findOne ({_id: 921394});
+
+insert, save
+db.<collection>.insert( <document> )
+db.<collection>.save( <document> )
+The save operation comprises inserts as well as updates: if the _id field is not present in the document
+given to save it will be inserted; otherwise it updates the document with that _id value in the collection.
+
+update
+Modifier operations include incrementation of numerical values($inc), setting and removing of fields ($set,$unset),
+ adding of values to an array ($push,$pushall,$addToSet), removing values from an array ($pop,$pull,$pullAll),
+ replacing of array values ($15) and renaming of fields ($rename)
+
+db.<collection>.update( <criteria>, <new document>, <upsert>, <multi> );
+db.<collection>.update( { title: "MongoDB"}, {$inc: {revision: 1}} );
+
+db.<collection >.remove( { <criteria > , $atomic: true} );
+
+
+db.<collection>.mapReduce( 
+    map: <map-function>,
+    reduce: <reduce-function>,
+    query: <selection criteria>,
+    sort: <sorting specification>,
+    limit: <number of objects to process>,
+    out: <output-collection name>,
+    outType: <"normal"|"merge"|"reduce">,
+    keeptemp: <true|false>,
+    finalize: <finalize function>,
+    scope: <object with variables to put in global namespace>,
+    verbose: <true|false>
+);
+
+    #map is a javascript function that maps a value with a key and emits a key-valur pair
+    #reduce is a javscript function that reduces or groups all the documents having the same key
+    #out specifies the location of the map-reduce query result
+    #query specifies the optional selection criteria for selecting documents
+    #sort specifies the optional sort criteria
+    #limit specifies the optional maximum number of documents to be returned
+
+example:
+use a mapReduce function on our posts collection to select all the active posts,
+group them on the basis of user_name and then count the number of posts by each user using the following code
+
+db.posts.mapReduce( 
+    function() { emit(this.user_id,1); },   //map function
+    function(key, values) {return Array.sum(values)},  //reduce function
+    {  
+         query:{status:"active"},  
+         out:"post_total" 
+    }
+)
+
+result:
+{
+   "result" : "post_total",
+   "timeMillis" : 9,
+   "counts" : {
+      "input" : 4,
+      "emit" : 4,
+      "reduce" : 2,
+      "output" : 2
+   },
+   "ok" : 1,
+}
+
+To see the result of this mapReduce query use the find operator:
+db.posts.mapReduce( 
+   function() { emit(this.user_id,1); }, 
+   function(key, values) {return Array.sum(values)}, 
+      {  
+         query:{status:"active"},  
+         out:"post_total" 
+      }
+).find()
+
+{ "_id" : "tom", "value" : 2 }
+{ "_id" : "mark", "value" : 2 }
+
