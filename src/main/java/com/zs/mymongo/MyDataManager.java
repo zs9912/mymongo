@@ -146,7 +146,7 @@ public class MyDataManager {
     }
     
     //>db.restaurants.find({'grades.score':{$lt:10}}).pretty()
-    //>db.restaurants.find({'grades.score':{$lt:10,$gt:20}}).pretty()   (10>grades.score>20)
+    //>db.restaurants.find({'grades.score':{$lt:20,$gt:10}}).pretty()   (10<grades.score<20)
     public FindIterable<Document> getDocumentsLessThan(){
         FindIterable<Document> iterable = db.getCollection("restaurants").find(lt("grades.score", 10));
         iterable.forEach(new Block<Document>(){
